@@ -1,0 +1,139 @@
+.container {
+  display: flex;
+  gap: 2%;
+}
+
+.stage {
+  width: 400px;
+  border: solid black 1px;
+  text-align: center;
+  padding: 10px;
+}
+
+p {
+  color: black;
+}
+
+.name {
+  text-align: left;
+}
+
+
+.overlapped {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  margin: 0;
+  opacity: 0.1;
+  width: 100%;
+}
+
+.overlap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  margin: 0;
+  width: 100%;
+  background: #eee;
+  border-radius: 5px;
+  line-height: 40px;
+  text-align: center;
+}
+
+
+.drop-area {
+  height: 200px;
+  width: 100%;
+  border: 1px dashed red;
+  border-radius: 5px;
+}
+
+.items {
+  list-style-type: none;
+  padding-left: 0;
+  border: dotted black 1px;
+  min-height: 30px;
+}
+
+.items-item {
+  border: 1px solid #999;
+  padding: 10px;
+  cursor: pointer;
+  margin: 5px 0;
+  border-radius: 5px;
+  width: 378.171px;
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+}
+
+
+.card-input {
+  width: 390px;
+}
+
+.input-card-text {
+  width: 100%;
+  height: 40px;
+  margin-bottom: 10px;
+}
+
+
+.items-item.dragged {
+  position: absolute;
+  cursor: grabbing;
+  z-index: 999;
+  pointer-events: none;
+  background: #fff;
+}
+
+
+.btn-add {
+  border: none;
+  background-color: white;
+}
+
+.btn-add.hidden {
+  display: none
+}
+
+.button-discard {
+  background-color: white;
+  border: none;
+  font-size: 16px;
+}
+
+.button-add-card {
+  color: white;
+  background-color: green;
+  border: none;
+  height: 30px;
+  width: 150px;
+  font-weight: 700;
+  margin-right: 20px;
+}
+
+.button-box {
+  display: flex;
+}
+
+.delete {
+  position: relative;
+  width: 10%;
+  display: none;
+}
+
+.items li:hover .delete {
+  display: block;
+}
+
+.insert-marker {
+  height: 40px;
+  width: 395;
+  ;
+  border: dashed;
+}
