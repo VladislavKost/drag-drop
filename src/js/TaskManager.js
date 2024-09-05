@@ -144,6 +144,7 @@ export class TasksManager {
       this.width = rect.right - rect.left;
       this.height = rect.bottom - rect.top;
 
+      this.draggedElement.classList.add("mouseDown");
       this.draggedElement.classList.add("dragged");
 
       const ul = e.target.closest("ul");
@@ -184,15 +185,14 @@ export class TasksManager {
   }
 
   onMouseUp(e) {
-    console.log("up");
     const closestUl = e.target.closest("ul");
     if (closestUl) {
       this.draggedElement.classList.remove("dragged");
+      this.draggedElement.classList.remove("mouseDown");
       if (closestUl.children.length > 0) {
         closestUl.insertBefore(this.draggedElement, e.target);
         this.insertMarker.remove();
       } else {
-        console.log("here");
         this.insertMarker.remove();
         closestUl.appendChild(this.draggedElement);
       }
@@ -200,6 +200,7 @@ export class TasksManager {
       this.saveState();
     }
 
+    this.draggedElement.classList.remove("mouseDown");
     this.draggedElement.classList.remove("dragged");
     this.draggedElement = undefined;
 
@@ -209,7 +210,6 @@ export class TasksManager {
 
   onMouseOver(e) {
     const ul = e.target.closest("ul");
-    console.log("over");
     if (ul && e.target.tagName === "LI") {
       if (!this.insertMarker) {
         this.createMarker(e);
