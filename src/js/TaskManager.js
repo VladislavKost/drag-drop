@@ -226,17 +226,16 @@ export class TasksManager {
     if (e.target.tagName === "LI") {
       if (!this.insertMarker) {
         this.createMarker(e);
-        parentUL.before(this.insertMarker, e.target);
+        parentUL.insertBefore(this.insertMarker, e.target);
       } else if (this.insertMarker && e.target !== this.insertMarker) {
-        this.insertMarker.remove();
-        this.createMarker(e);
         if (parentUL.lastChild === e.target) {
           parentUL.append(this.insertMarker);
         } else {
           parentUL.insertBefore(this.insertMarker, e.target);
         }
       }
-    } else if (e.target.tagName === "UL" && e.target.children.length === 0) {
+    }
+    if (e.target.tagName === "UL" && e.target.children.length === 0) {
       this.insertMarker.remove();
       this.createMarker(e);
       e.target.append(this.insertMarker);
