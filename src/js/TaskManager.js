@@ -14,6 +14,8 @@ export class TasksManager {
     this.onDelete = this.onDelete.bind(this);
     this.createMarker = this.createMarker.bind(this);
     this.onMouseDown = this.onMouseDown.bind(this);
+    this.onMouseMove = this.onMouseMove.bind(this);
+    this.setElementPosition = this.setElementPosition.bind(this);
 
     this.generateStages();
     this.items = this.parentEl.querySelectorAll(".items");
@@ -90,13 +92,18 @@ export class TasksManager {
     }
   }
 
+  setElementPosition(e) {
+    this.draggedElement.style.top = e.clientY - this.diffY - 25 + "px";
+    this.draggedElement.style.left = e.clientX - this.diffX - 10 + "px";
+  }
+
   generateStages() {
     const stages = ["To Do", "In progress", "Done"];
     stages.forEach((stage) => {
       const div = document.createElement("div");
       div.innerHTML = TasksManager.stageColumn(stage);
       div.classList.add("stage");
-      this.parentEl.appendChild(div);
+      this.parentEl.append(div);
     });
   }
 
@@ -135,17 +142,20 @@ export class TasksManager {
 
   onMouseDown(e) {
     e.preventDefault();
+    if (e.target.classList.contains("delete")) {
+      this.onDelete(e);
+      return;
+    }
     if (e.target.tagName === "LI" || e.target.tagName === "DIV") {
       this.draggedElement = e.target.closest("li");
 
       const rect = this.draggedElement.getBoundingClientRect();
       this.diffX = e.clientX - rect.x;
       this.diffY = e.clientY - rect.y;
-      this.width = rect.right - rect.left;
-      this.height = rect.bottom - rect.top;
 
-      this.draggedElement.classList.add("mouseDown");
       this.draggedElement.classList.add("dragged");
+
+      this.setElementPosition(e);
 
       const ul = e.target.closest("ul");
       const li = e.target.closest("li");
@@ -154,6 +164,7 @@ export class TasksManager {
 
       document.documentElement.addEventListener("mouseup", this.onMouseUp);
       document.documentElement.addEventListener("mouseover", this.onMouseOver);
+      document.documentElement.addEventListener("mousemove", this.onMouseMove);
     }
   }
 
@@ -188,53 +199,59 @@ export class TasksManager {
     const closestUl = e.target.closest("ul");
     if (closestUl) {
       this.draggedElement.classList.remove("dragged");
-      this.draggedElement.classList.remove("mouseDown");
-      if (closestUl.children.length > 0) {
-        closestUl.insertBefore(this.draggedElement, e.target);
-        this.insertMarker.remove();
-      } else {
-        this.insertMarker.remove();
-        closestUl.appendChild(this.draggedElement);
-      }
-
+      this.insertMarker.replaceWith(this.draggedElement);
+      this.saveState();
+    }
+    if (!closestUl && this.insertMarker) {
+      this.insertMarker.replaceWith(this.draggedElement);
       this.saveState();
     }
 
-    this.draggedElement.classList.remove("mouseDown");
     this.draggedElement.classList.remove("dragged");
+    this.draggedElement.removeAttribute("style");
     this.draggedElement = undefined;
+    this.elementOver.classList.remove("mouseDown");
 
     document.documentElement.removeEventListener("mouseup", this.onMouseUp);
     document.documentElement.removeEventListener("mouseover", this.onMouseOver);
+    document.documentElement.removeEventListener("mousemove", this.onMouseMove);
   }
 
   onMouseOver(e) {
-    const ul = e.target.closest("ul");
-    if (ul && e.target.tagName === "LI") {
+    const parentUL = e.target.closest("ul");
+    if (!parentUL) {
+      return;
+    }
+
+    if (e.target.tagName === "LI") {
       if (!this.insertMarker) {
         this.createMarker(e);
-        ul.insertBefore(this.insertMarker, e.target);
+        parentUL.before(this.insertMarker, e.target);
       } else if (this.insertMarker && e.target !== this.insertMarker) {
         this.insertMarker.remove();
         this.createMarker(e);
-        if (ul.lastChild == e.target) {
-          ul.appendChild(this.insertMarker);
+        if (parentUL.lastChild === e.target) {
+          parentUL.append(this.insertMarker);
         } else {
-          ul.insertBefore(this.insertMarker, e.target);
+          parentUL.insertBefore(this.insertMarker, e.target);
         }
       }
-    } else if (
-      ul &&
-      e.target.tagName == "UL" &&
-      e.target.children.length === 0
-    ) {
+    } else if (e.target.tagName === "UL" && e.target.children.length === 0) {
       this.insertMarker.remove();
       this.createMarker(e);
-      e.target.appendChild(this.insertMarker);
+      e.target.append(this.insertMarker);
     }
+  }
 
-    this.draggedElement.style.top = e.clientY - this.diffY + "px";
-    this.draggedElement.style.left = e.clientX - this.diffX + "px";
+  onMouseMove(e) {
+    if (this.draggedElement) {
+      this.setElementPosition(e);
+    }
+    if (this.elementOver !== e.target) {
+      this.elementOver && this.elementOver.classList.remove("mouseDown");
+      this.elementOver = e.target;
+      this.elementOver.classList.add("mouseDown");
+    }
   }
 
   createCard(ul, inputValue) {
@@ -244,12 +261,9 @@ export class TasksManager {
     li.innerHTML = TasksManager.addNewCard;
 
     const cardName = li.querySelector(".card-name");
-    cardName.appendChild(document.createTextNode(inputValue));
+    cardName.append(document.createTextNode(inputValue));
 
-    ul.appendChild(li);
-
-    const deleteButton = li.querySelector(".delete");
-    deleteButton.addEventListener("click", this.onDelete);
+    ul.append(li);
   }
 
   onDelete(e) {
